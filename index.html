@@ -208,6 +208,29 @@
     .reserve-btn:hover {
       background-color: #005fa3;
     }
+
+    @keyframes flash-bg {
+       0%   { background-color: #ffe4e4; }
+        100% { background-color: #f8d3d3; }
+    }
+
+    .rooms-left.flash {
+      animation: flash-bg 0.8s ease-out;
+    }
+
+    .purchases {
+      height: 24px;
+      transition: opacity 0.3s ease;
+      opacity: 0;
+      color: #d80000;
+      font-size: 18px;
+      visibility: hidden;
+    }
+
+    .purchases.show {
+       opacity: 1;
+       visibility: visible;
+    }
   </style>
 </head>
 <body>
@@ -279,64 +302,91 @@
       const nextBtn = document.querySelector('.next');
       const scenarioPage = document.getElementById("scenario-page");
       const stimulusPage = document.getElementById("stimulus-page");
-
+  
       startBtn.addEventListener("click", goToStimulus);
       backBtn.addEventListener("click", goToScenario);
       prevBtn.addEventListener("click", prevImage);
       nextBtn.addEventListener("click", nextImage);
-
+  
       function goToStimulus() {
         scenarioPage.classList.remove("active");
         stimulusPage.classList.add("active");
-        updateRoomCount(0);
+  
+        // Set initial state manually (no message or flash)
+        const initialRooms = roomStates[0];
+        roomsLeftElem.textContent = 'Rooms Left: ' + initialRooms;
+  
+        const purchaseMsg = document.querySelector('.purchases');
+        purchaseMsg.textContent = '';
+        purchaseMsg.classList.remove('show');
+  
+        // Begin updates from index 1 (i.e., first actual "change")
+        setTimeout(() => updateRoomCount(1), timeDelays[0]);
       }
-
+  
       function goToScenario() {
         stimulusPage.classList.remove("active");
         scenarioPage.classList.add("active");
       }
-
+  
       const imagePaths = [
         "https://cf.bstatic.com/xdata/images/hotel/max1024x768/321354367.jpg?k=7bbf3d7c0bb58231937a35bcdb8b7e0e2dba3179583b7e85437d72e4b3343164&o=&hp=1",
         "https://cf.bstatic.com/xdata/images/hotel/max1024x768/321354257.jpg?k=419027b1b400a15ba95115915abc593580efa352350ed789ce97725faf767f80&o=&hp=1",
         "https://cf.bstatic.com/xdata/images/hotel/max1024x768/612283721.jpg?k=fa209a270765f2018ea932251b905198d62b5e9d07cadfb466b8fdc0a0a8a354&o=&hp=1"
       ];
-
+  
       let currentImageIndex = 0;
       const sliderImage = document.querySelector('.slider-image');
-
+  
       function showImage(index) {
         sliderImage.src = imagePaths[index];
       }
-
+  
       function prevImage() {
         currentImageIndex = (currentImageIndex - 1 + imagePaths.length) % imagePaths.length;
         showImage(currentImageIndex);
       }
-
+  
       function nextImage() {
         currentImageIndex = (currentImageIndex + 1) % imagePaths.length;
         showImage(currentImageIndex);
       }
-
+  
       showImage(currentImageIndex);
-
+  
       const roomsLeftElem = document.querySelector('.rooms-left');
       const roomStates = [4, 3, 2];
       const timeDelays = [4000, 5000];
-
+  
       function updateRoomCount(index) {
         if (index >= roomStates.length) return;
-
+  
         const roomsLeft = roomStates[index];
         roomsLeftElem.textContent = 'Rooms Left: ' + roomsLeft;
-
+  
+        // Flash effect
+        roomsLeftElem.classList.add('flash');
+        setTimeout(() => {
+          roomsLeftElem.classList.remove('flash');
+        }, 800);
+  
+        // Show message
+        const purchaseMsg = document.querySelector('.purchases');
+        purchaseMsg.textContent = "Someone just booked this room!";
+        purchaseMsg.classList.add('show');
+  
+        setTimeout(() => {
+          purchaseMsg.classList.remove('show');
+        }, 1800);
+  
+        // Schedule next update
         if (index < timeDelays.length) {
           setTimeout(() => updateRoomCount(index + 1), timeDelays[index]);
         }
       }
     });
   </script>
+  
 
 </body>
 </html>
